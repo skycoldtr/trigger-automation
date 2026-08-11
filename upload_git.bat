@@ -1,112 +1,56 @@
 @echo off
 chcp 65001 > nul
-title GitHub Kolay Dosya Yukleme Araci
-
-:: Komut dosyasinin calistigi klasöre odaklan (System32 hatasini önler)
+title GitHub Otomasyon - Akilli Yukleme
 cd /d "%~dp0"
 
 echo ========================================================
-echo         GITHUP DOSYA YUKLEME OTOMASYONU
+echo         GITHUP DOSYA YUKLEME OTOMASYONU (V2)
 echo ========================================================
 echo.
 
-:: Git kontrolü
-git --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [HATA] Sisteminizde Git yuklu degil veya PATH e eklenmemis!
-    goto HATA_CIKIS
-)
-
-:: Git reposu kontrolü
+:: 1. Git Başlatma (Yoksa)
 if not exist ".git" (
-    echo [+] Bu klasorde bir Git reposu bulunamadi.
-    set /p "repo_url=Repo linkini yapistirin (Orn: https://github.com/kullanici/repo.git): "
-    
+    echo [+] Git reposu bulunamadi, kuruluyor...
     git init
+    set /p "repo_url=Repo linkini yapistirin: "
     git remote add origin %repo_url%
-    if %errorlevel% neq 0 (
-        echo [HATA] Repo eklenirken bir sorun olustu!
-        goto HATA_CIKIS
-    )
-    echo [+] Repo basariyla tanimlandi.
-    echo.
-) else (
-    echo [+] Mevcut Git reposu algilandi.
 )
 
+:: 2. Dosya Seçimi
 echo.
 echo --------------------------------------------------------
-echo YUKLEME SECENEKLERI:
-echo [1] Tek bir dosya yuklemek istiyorum
-echo [2] Toplu dosya / Tum klasoru yuklemek istiyorum
+echo [1] Tek dosya yukle
+echo [2] Tum klasoru yukle
 echo --------------------------------------------------------
-set /p "secim=Seciminiz (1 veya 2): "
+set /p "secim=Seciminiz: "
 
 if "%secim%"=="1" (
-    echo.
-    set /p "dosya_adi=Yuklenecek dosyanin tam adini ve uzantisini yazin (Orn: index.html): "
-    if not exist "%dosya_adi%" (
-        echo [HATA] '%dosya_adi%' adinda bir dosya bulunamadi!
-        goto HATA_CIKIS
-    )
-    git add "%dosya_adi%"
-) else if "%secim%"=="2" (
-    echo.
-    echo [+] Tum dosya ve klasorler ekleniyor...
+    set /p "f_name=Dosya adi: "
+    git add "%f_name%"
+) else (
     git add .
-) else (
-    echo [HATA] Gecersiz secim yaptiniz!
-    goto HATA_CIKIS
 )
 
-echo.
-echo --------------------------------------------------------
-echo AYNI DOSYA KONTROLU:
-echo Sunucuda ayni isimde dosya varsa uzerine yazilsin/degistirilsin mi?
-echo [1] Evet, degistirsin (Guncelle)
-echo [2] Hayir, iptal et / Guvenli mod
-echo --------------------------------------------------------
-set /p "conflict_secim=Seciminiz (1 veya 2): "
+:: 3. Commit Kontrolü ve Branch Sabitleme
+:: Burada "Hata vermesin diye" önce bir commit atıyoruz.
+echo [+] Commit hazirlaniyor...
+git commit -m "Otomatik yukleme: %date% %time%" 2>nul
 
-if "%conflict_secim%"=="2" (
-    echo [!] Islem kullanici tarafindan iptal edildi.
-    git reset
-    goto HATA_CIKIS
-)
+:: Branch ismini main yap ve pushla
+echo [+] Branch 'main' olarak ayarlanip gonderiliyor...
+git branch -M main
+git push -u origin main --force
 
-echo.
-set /p "commit_mesaji=Commit (guncelleme) mesaji girin (Orn: Dosyalar guncellendi): "
-if "%commit_mesaji%"=="" set "commit_mesaji=Otomatik dosya guncellemesi"
-
-echo.
-echo [+] Degisiklikler kaydediliyor...
-git commit -m "%commit_mesaji%"
-
-echo.
-echo [+] Dosyalar GitHub a gonderiliyor...
-set /p "branch=Hangi branch e gondereceksiniz? (Genelde main veya master yazilir): "
-if "%branch%"=="" set "branch=main"
-
-git push -u origin %branch%
-
-if %errorlevel% eq 0 (
+if %errorlevel% equ 0 (
     echo.
     echo ========================================================
-    echo    ISLEM BASARILI! Dosyalar GitHub a yuklendi.
+    echo      ISLEM BASARILI! Dosyalar GitHub'a ulasti.
     echo ========================================================
-    goto BITIR
 ) else (
     echo.
-    echo [HATA] Dosyalar gonderilirken bir hata olustu. 
-    echo Eger 'rejected' hatasi aldiysaniz GitHub'da dosyalar var demektir.
-    goto HATA_CIKIS
+    echo [!] HATA: Push islemi basarisiz. 
+    echo - Repo linkini dogru yazdigindan emin ol.
+    echo - GitHub'a giris yapmamis olabilirsin (tarayiciyi kontrol et).
 )
 
-:HATA_CIKIS
-echo.
-echo Islem basarisiz oldu veya durduruldu.
-pause
-exit
-
-:BITIR
 pause
