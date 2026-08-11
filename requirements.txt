@@ -1,0 +1,6 @@
+pyautogui
+opencv-python
+keyboard
+Pillow
+tkinterdnd2
+pyinstaller

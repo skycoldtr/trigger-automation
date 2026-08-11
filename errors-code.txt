@@ -1,0 +1,141 @@
+TRIGGER — Error Code Reference
+================================
+This file lists every custom error code TRIGGER can show, what it means, and
+how to fix it. If the app shows a code like "TRG-002", look it up here.
+(Türkçe açıklamalar her kod başlığının altında yer alıyor.)
+
+
+TRG-001 — Missing required library
+-----------------------------------
+EN: The app couldn't start because a required Python package isn't
+    installed (Pillow, pyautogui, or keyboard). This is checked before
+    anything else, so you'll see a plain system popup, not the app's
+    own theme, since the app hasn't started yet.
+    Fix: pip install -r requirements.txt
+
+TR: Gerekli bir Python paketi (Pillow, pyautogui veya keyboard) kurulu
+    olmadığı için uygulama başlayamadı. Bu kontrol her şeyden önce
+    yapıldığı için uygulamanın kendi teması değil, düz bir sistem
+    penceresi görürsün — henüz uygulama başlamamış olur.
+    Çözüm: pip install -r requirements.txt
+
+
+TRG-002 — OpenCV not installed
+--------------------------------
+EN: Image matching with a confidence value below 1.00 (i.e. "approximate"
+    matching, which almost every step uses by default) requires the
+    opencv-python package. Without it, PyAutoGUI cannot do fuzzy image
+    matching at all — every match attempt fails, which is why the app can
+    look like it "does nothing" when you hit Start even though everything
+    else is set up correctly. This was the most common cause of the
+    "adds fine but never clicks" reports.
+    Fix: pip install opencv-python
+    Workaround: when this warning appears, choosing "Continue anyway"
+    switches the current run to exact pixel matching (no OpenCV needed),
+    but the target image must then match the screen exactly, pixel for
+    pixel — less forgiving, but functional.
+
+TR: 1.00'ın altındaki bir hassasiyet (confidence) değeriyle görsel
+    eşleştirme (yani her adımın varsayılan olarak kullandığı "yaklaşık"
+    eşleştirme) opencv-python paketini gerektirir. Kurulu değilse
+    PyAutoGUI hiçbir şekilde bulanık/yaklaşık eşleştirme yapamaz — her
+    eşleştirme denemesi başarısız olur, bu yüzden Başlat'a bastığında her
+    şey doğru kurulmuş olsa bile uygulama "hiçbir şey yapmıyormuş" gibi
+    görünür. "Ekliyorum ama hiç tıklamıyor" şikayetlerinin en yaygın
+    sebebi buydu.
+    Çözüm: pip install opencv-python
+    Geçici çözüm: bu uyarı çıktığında "Devam Et"i seçersen, o oturum için
+    kesin piksel eşleştirmesine geçilir (OpenCV gerekmez), ama hedef
+    görselin ekranla piksel piksel birebir eşleşmesi gerekir — daha az
+    toleranslı ama çalışır.
+
+
+TRG-003 — Target image file not found
+----------------------------------------
+EN: A step's target image file couldn't be opened during automation (it may
+    have been moved, renamed, or deleted after being added to the queue).
+    (Fixed in v4.5: this code used to also fire for a completely different
+    bug — OpenCV silently fails to read file paths containing non-ASCII
+    characters like Turkish ç/ı/ğ/ş/ö/ü on Windows, e.g. default screenshot
+    names like "Ek Açıklama....png". The app no longer hands raw paths to
+    OpenCV at all — it pre-loads every image via Pillow instead, which
+    reads such paths correctly.)
+    Fix: re-select the image for that step, or remove it from the queue.
+
+TR: Otomasyon sırasında bir adımın hedef görsel dosyası açılamadı (kuyruğa
+    eklendikten sonra taşınmış, adı değiştirilmiş veya silinmiş olabilir).
+    (v4.5'te düzeltildi: bu kod daha önce tamamen farklı bir hata için de
+    tetikleniyordu — Windows'ta OpenCV, Türkçe ç/ı/ğ/ş/ö/ü gibi karakterler
+    içeren dosya yollarını (örn. "Ek Açıklama....png" gibi varsayılan ekran
+    görüntüsü isimleri) sessizce okuyamıyordu. Artık uygulama ham dosya
+    yolunu hiç OpenCV'ye vermiyor — her görseli önce Pillow ile yüklüyor,
+    o da bu tarz yolları sorunsuz okuyor.)
+    Çözüm: o adım için görseli yeniden seç, ya da listeden kaldır.
+
+
+TRG-004 — Screen capture / click failed
+------------------------------------------
+EN: PyAutoGUI couldn't read the screen or perform a click — possibly a
+    permissions issue, an unsupported multi-monitor/DPI-scaling setup, or
+    the display was locked/asleep.
+    Fix: make sure the app has the necessary OS permissions, check your
+    monitor/display scaling settings, and try again.
+
+TR: PyAutoGUI ekranı okuyamadı ya da tıklama gerçekleştiremedi — izin
+    sorunu, desteklenmeyen çoklu monitör/DPI ölçekleme ayarı, ya da ekran
+    kilitli/uyku modunda olabilir.
+    Çözüm: uygulamanın gerekli sistem izinlerine sahip olduğundan emin ol,
+    monitör/ekran ölçekleme ayarlarını kontrol et ve tekrar dene.
+
+
+TRG-005 — Global 'Q' abort hotkey unavailable
+------------------------------------------------
+EN: The 'keyboard' library couldn't register the global 'Q' abort hotkey.
+    This almost always means the app needs elevated permissions to listen
+    system-wide for a keypress.
+    Fix: close the app and re-run it as Administrator.
+
+TR: 'keyboard' kütüphanesi genel 'Q' iptal tuşunu sisteme kaydedemedi. Bu
+    hemen hemen her zaman uygulamanın sistem genelinde tuş dinlemek için
+    yükseltilmiş (Yönetici) izne ihtiyaç duyduğu anlamına gelir.
+    Çözüm: uygulamayı kapatıp Yönetici olarak yeniden çalıştır.
+
+
+TRG-006 — Settings file corrupted
+-------------------------------------
+EN: ~/.trigger/settings.json couldn't be read (corrupted, or written by an
+    incompatible future version) and was reset to defaults. Your saved
+    queue and preferences from that file were lost.
+    Fix: nothing needed — the app recovers automatically. If it keeps
+    happening, delete the ~/.trigger folder manually and restart.
+
+TR: ~/.trigger/settings.json okunamadı (bozuk ya da uyumsuz, daha yeni bir
+    sürüm tarafından yazılmış olabilir) ve varsayılana sıfırlandı. O
+    dosyadaki kayıtlı kuyruk ve tercihlerin kayboldu.
+    Çözüm: bir şey yapmana gerek yok — uygulama otomatik toparlanır.
+    Tekrarlarsa ~/.trigger klasörünü elle sil ve yeniden başlat.
+
+
+TRG-007 — Could not save settings
+-------------------------------------
+EN: The app couldn't write to ~/.trigger/settings.json — disk full,
+    permission denied, or the folder was deleted while the app was
+    running.
+    Fix: check available disk space and folder permissions for your user
+    profile.
+
+TR: Uygulama ~/.trigger/settings.json dosyasına yazamadı — disk dolu,
+    izin reddedildi, ya da klasör uygulama çalışırken silinmiş olabilir.
+    Çözüm: kullanıcı profilindeki disk alanını ve klasör izinlerini
+    kontrol et.
+
+
+TRG-999 — Unexpected error
+------------------------------
+EN: Something failed that isn't covered by a specific code above. The
+    dialog includes the original Python exception message — please
+    include that text if you report a bug on GitHub.
+
+TR: Yukarıdaki kodların hiçbirine girmeyen bir hata oluştu. Pencerede
+    orijinal Python hata mesajı da gösterilir — GitHub'da hata bildirirken
+    o metni de eklersen çok yardımcı olur.
