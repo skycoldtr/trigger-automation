@@ -76,7 +76,7 @@ if "%conflict_secim%"=="2" (
 
 echo.
 set /p "commit_mesaji=Commit (guncelleme) mesaji girin (Orn: Dosyalar guncellendi): "
-if "%commit_mesaji%"=="" set "commit_mesaji=Otomatik dosya guncellemesi"
+if "%commit_mesaji%"=="" set "commit_mesaji=Otomatik dosya guncellendi"
 
 echo.
 echo [+] Degisiklikler kaydediliyor...
@@ -99,13 +99,15 @@ if %errorlevel% eq 0 (
     goto BITIR
 ) else (
     echo.
-    echo [HATA] Dosyalar gonderilirken bir hata olustu.
+    echo [KIRMIZI HATA] Dosyalar gonderilirken bir sorunla karsilasildi!
     goto HATA_CIKIS
 )
 
 :HATA_CIKIS
 echo.
-echo [!] Islem basarisiz oldu veya durduruldu.
+echo --------------------------------------------------------
+echo [!] Islem basarisiz oldu. Lutfen yukaridaki hata mesajini inceleyin.
+echo --------------------------------------------------------
 pause
 exit
 
